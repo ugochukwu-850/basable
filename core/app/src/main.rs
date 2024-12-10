@@ -45,7 +45,11 @@ async fn main() -> Result<(), AppError> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let port = get_env("BASABLE_PORT").map_err(|err| AppError::InitError(err.to_string()))?;
+    let port = get_env("BASABLE_PORT")
+        .map_err(|err| AppError::InitError(err.to_string()))?
+        .parse::<u32>()
+        .map_err(|_| AppError::InitError("Bad port number".to_string()))?;
+    
     let app = app()?;
 
     if let Ok(listener) = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await {
